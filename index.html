@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Biblioteca | Leitura</title>
+  <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand:"#2B5356", brand2:"#739C95", texto:"#FFFFFF" },
+          boxShadow: { soft:"0 10px 25px rgba(0,0,0,.18)" }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root { --primary:#2B5356; --secondary:#739C95; --text:#FFFFFF; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,.08); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 10px; }
+    .glass { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.08); }
+    .cover-img { object-fit: cover; object-position: center; }
+
+    /* Card da vitrine: capa maior e sem cortar */
+    .cover-cont-card { height: 14rem; } /* h-56 */
+    .cover-img-card { width:100%; height:100%; object-fit: contain; background:#0F2A29; }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen bg-[radial-gradient(1200px_600px_at_10%_0%,#3e7a7f1a,transparent),linear-gradient(180deg,#1a2f31,#0c191a)] text-texto">
+  <!-- Header -->
+  <header class="sticky top-0 z-30 glass">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+      <h1 class="text-xl font-semibold tracking-tight">Biblioteca da Options</h1>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <main class="flex-grow flex items-center justify-center px-4 py-10">
+    <!-- Apenas um livro -->
+    <section class="text-center">
+      <h2 class="text-xl font-semibold mb-6">📖 Livro</h2>
+      <div id="livroAtual" class="flex justify-center"></div>
+    </section>
+  </main>
+
+  <!-- Footer estrutural (empurra a página para baixo) -->
+  <footer class="h-16"></footer>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/60" data-dismiss></div>
+    <div class="relative max-w-4xl mx-auto mt-16 mb-10 p-0">
+      <div class="glass rounded-3xl shadow-soft overflow-hidden">
+        <div class="flex flex-col lg:flex-row">
+          <div class="lg:w-1/3 bg-brand/40 flex items-center justify-center p-8">
+            <!-- CAPA (modal já estava com proporção boa) -->
+            <div class="w-48 h-64 rounded-2xl overflow-hidden shadow-soft">
+              <img id="capaImg" src="" alt="Capa do livro" class="w-full h-full cover-img"/>
+            </div>
+          </div>
+          <div class="lg:w-2/3 p-6 lg:p-8">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 id="detTitulo" class="text-2xl font-bold"></h3>
+                <p id="detAutor" class="opacity-80"></p>
+              </div>
+              <button class="p-2 rounded-lg hover:bg-white/10" data-dismiss aria-label="Fechar">✕</button>
+            </div>
+            <p id="detDesc" class="mt-3 opacity-90"></p>
+            <div class="mt-5 grid sm:grid-cols-2 gap-3">
+              <a id="detDownload" href="#" download class="text-center px-4 py-3 rounded-xl bg-brand2 text-black font-semibold hover:opacity-90 transition">⬇️ Baixar livro</a>
+              <div class="glass rounded-xl p-3">
+                <label class="text-sm opacity-80">Data de início da leitura</label>
+                <input id="dataInicio" type="date" class="mt-1 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand2">
+              </div>
+            </div>
+            <div class="mt-6">
+              <div class="flex items-center justify-between">
+                <h4 class="font-semibold">Capítulos & Datas</h4>
+                <div class="flex items-center gap-2">
+                  <button id="btnHoje" class="text-sm underline decoration-dotted"></button>
+                  <button id="btnExportar" class="text-sm underline decoration-dotted"></button>
+                </div>
+              </div>
+              <div class="mt-3 max-h-72 overflow-auto">
+                <table class="w-full text-left border-separate" style="border-spacing:0 8px">
+                  <thead class="sticky top-0 bg-[#143132]">
+                    <tr><th class="py-2 px-3 rounded-l-lg">Capítulo</th><th class="py-2 px-3">Data</th><th class="py-2 px-3 rounded-r-lg">Dia da semana</th></tr>
+                  </thead>
+                  <tbody id="tabelaCapitulos"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="mt-6 flex flex-wrap items-center gap-2 text-sm opacity-80">
+              <span id="detQtd" class="px-2 py-1 rounded bg-white/10"></span>
+              <span class="px-2 py-1 rounded bg-white/10">1 capítulo por dia (sem sáb./dom.)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template card -->
+  <template id="tplCard">
+    <!-- ↑ aumentei a largura do card para w-80 -->
+    <article class="group glass rounded-2xl p-4 shadow-soft hover:-translate-y-[2px] transition cursor-pointer w-80">
+      <div class="relative">
+        <!-- ↑ contêiner mais alto e imagem object-contain para não cortar -->
+        <div class="rounded-xl overflow-hidden cover-cont-card">
+          <img class="cover-img-card" alt="Capa"/>
+        </div>
+        <button class="absolute bottom-2 right-2 px-3 py-1 rounded-lg text-sm bg-white/90 text-black font-semibold opacity-0 group-hover:opacity-100 transition">Ver detalhes</button>
+      </div>
+      <div class="mt-4">
+        <h3 class="font-semibold line-clamp-2"></h3>
+        <p class="opacity-80 text-sm mt-1"></p>
+      </div>
+      <div class="mt-auto pt-4 flex items-center justify-between">
+        <a class="btnDownload px-4 py-2 rounded-xl bg-brand2 text-black font-semibold hover:opacity-90 transition" href="#" download>Download</a>
+        <span class="text-xs opacity-75"><strong class="qtd"></strong> cap.</span>
+      </div>
+    </article>
+  </template>
+
+  <!-- Script -->
+  <script>
+    // ====== LIVRO ÚNICO ======
+    const LIVRO = {
+      title: "Ações Comuns, Lucros Extraordinários",
+      author: "Philip A. Fisher",
+      chapters: 10,                      // 10 capítulos
+      fileUrl: "livro.pdf",              // coloque a URL/arquivo do seu livro
+      coverUrl: "capa-fisher.png",       // coloque a imagem nesta mesma pasta ou ajuste o caminho
+      description: "Clássico do investimento em crescimento: como encontrar empresas excepcionais e mantê-las no longo prazo."
+    };
+    // =========================
+
+    // Configuração de início: 18/08 do ano atual
+    const ANO_ATUAL = new Date().getFullYear();
+    const INICIO_PADRAO_ISO = `${ANO_ATUAL}-08-18`;
+
+    let livroAtualSel=null;
+    let dataInicioAtual = INICIO_PADRAO_ISO;
+
+    // Utilitários
+    function hojeISO(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+    function formatDateBR(date){return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+    function diaSemana(date){return date.toLocaleDateString('pt-BR',{weekday:'long'});}
+    function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
+    function ehFds(date){const w=date.getDay();return w===0 || w===6;} // 0=Dom, 6=Sáb
+
+    // Gera uma lista de datas úteis (pula sábados e domingos)
+    function gerarDatasUteis(inicioISO, qtde){
+      const datas=[];
+      let d = new Date(inicioISO+"T00:00:00");
+      while(datas.length < qtde){
+        if(!ehFds(d)) datas.push(new Date(d));
+        d = addDays(d,1);
+      }
+      return datas;
+    }
+
+    // Elementos
+    const tplCard=document.getElementById('tplCard');
+    const livroAtualEl=document.getElementById('livroAtual');
+
+    const modal=document.getElementById('modal');
+    const detTitulo=document.getElementById('detTitulo');
+    const detAutor=document.getElementById('detAutor');
+    const detDesc=document.getElementById('detDesc');
+    const detDownload=document.getElementById('detDownload');
+    const detQtd=document.getElementById('detQtd');
+    const tabelaCapitulos=document.getElementById('tabelaCapitulos');
+    const dataInicio=document.getElementById('dataInicio');
+    const btnHoje=document.getElementById('btnHoje');
+    const btnExportar=document.getElementById('btnExportar');
+    const capaImg=document.getElementById('capaImg');
+
+    function abrirDetalhe(livro){
+      livroAtualSel=livro;
+      detTitulo.textContent=livro.title;
+      detAutor.textContent=livro.author?`por ${livro.author}`:"";
+      detDesc.textContent=livro.description||"Sem descrição.";
+      detDownload.href=livro.fileUrl||"#";
+      detQtd.textContent=`${livro.chapters??'-'} capítulos`;
+      capaImg.src = livro.coverUrl || "";
+      dataInicio.value=dataInicioAtual = INICIO_PADRAO_ISO; // fixa 18/08
+      gerarTabela(); 
+      modal.classList.remove('hidden'); 
+      document.body.style.overflow='hidden';
+    }
+    function fecharModal(){modal.classList.add('hidden');document.body.style.overflow='';}
+    modal.addEventListener('click',(e)=>{if(e.target.hasAttribute('data-dismiss'))fecharModal();});
+    document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&!modal.classList.contains('hidden'))fecharModal();});
+
+    dataInicio.addEventListener('change',()=>{dataInicioAtual=dataInicio.value||INICIO_PADRAO_ISO;gerarTabela();});
+    btnHoje.addEventListener('click',()=>{dataInicio.value=dataInicioAtual=hojeISO();gerarTabela();});
+    btnExportar.addEventListener('click',()=>{
+      if(!livroAtualSel)return;
+      const rows=[["Capítulo","Data","Dia","Livro","Autor"]];
+      const datas = gerarDatasUteis(dataInicioAtual, Number(livroAtualSel.chapters||0));
+      datas.forEach((d,i)=>{
+        rows.push([`Capítulo ${i+1}`, formatDateBR(d), diaSemana(d), livroAtualSel.title, livroAtualSel.author||""]);
+      });
+      const csv=rows.map(r=>r.map(c=>String(c)).join(";")).join("\n");
+      const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download="cronograma.csv";a.click();URL.revokeObjectURL(url);
+    });
+
+    function renderAtual(){
+      livroAtualEl.innerHTML="";
+      const node=tplCard.content.cloneNode(true);
+      const art=node.querySelector('article');
+      art.addEventListener('click',(e)=>{if(!(e.target.classList.contains('btnDownload')))abrirDetalhe(LIVRO);});
+      node.querySelector('h3').textContent=LIVRO.title||"Sem título";
+      node.querySelector('p').textContent=LIVRO.author||"";
+      node.querySelector('.qtd').textContent=LIVRO.chapters??"-";
+      node.querySelector('img').src = LIVRO.coverUrl || "";
+      const btn=node.querySelector('.btnDownload');
+      btn.href=LIVRO.fileUrl||"#";
+      btn.addEventListener('click',(ev)=>ev.stopPropagation());
+      livroAtualEl.appendChild(node);
+    }
+
+    function gerarTabela(){
+      if(!livroAtualSel)return;
+      const total=Number(livroAtualSel.chapters||0);
+      const datas = gerarDatasUteis(dataInicioAtual, total);
+      tabelaCapitulos.innerHTML="";
+      datas.forEach((d,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td class="py-2 px-3 bg-white/5 rounded-l-lg">Capítulo ${i+1}</td>
+          <td class="py-2 px-3 bg-white/5">${formatDateBR(d)}</td>
+          <td class="py-2 px-3 bg-white/5 rounded-r-lg capitalize">${diaSemana(d)}</td>`;
+        tabelaCapitulos.appendChild(tr);
+      });
+    }
+
+    // Inicializa
+    renderAtual();
+  </script>
+</body>
+</html>
