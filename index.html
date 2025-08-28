@@ -37,14 +37,19 @@
     /* Card da vitrine: capa maior e sem cortar */
     .cover-cont-card { height: 14rem; } /* h-56 */
     .cover-img-card { width:100%; height:100%; object-fit: contain; background:#0F2A29; }
+
+    .font-logo{ font-family: serif; }
+    .e-comercial{ color: #4EA788; }
   </style>
 </head>
 
 <body class="flex flex-col min-h-screen bg-[radial-gradient(1200px_600px_at_10%_0%,#3e7a7f1a,transparent),linear-gradient(180deg,#1a2f31,#0c191a)] text-texto">
   <!-- Header -->
   <header class="sticky top-0 z-30 glass">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <h1 class="text-xl font-semibold tracking-tight">Biblioteca da Options</h1>
+      <!-- Logo alinhada à direita -->
+          <h1 class="font-logo">Options<br><span class="e-comercial">&</span> Company</h1>
     </div>
   </header>
 
@@ -200,8 +205,8 @@
       detQtd.textContent=`${livro.chapters??'-'} capítulos`;
       capaImg.src = livro.coverUrl || "";
       dataInicio.value=dataInicioAtual = INICIO_PADRAO_ISO; // fixa 18/08
-      gerarTabela(); 
-      modal.classList.remove('hidden'); 
+      gerarTabela();
+      modal.classList.remove('hidden');
       document.body.style.overflow='hidden';
     }
     function fecharModal(){modal.classList.add('hidden');document.body.style.overflow='';}
